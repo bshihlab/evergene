@@ -1,0 +1,17 @@
+_backup/
+case_usage/
+evergene/data/
+evergene/rsconnect/
+evergene/.Rhistory
+evergene/evergene_survival/
+help_documentation/
+other/
+pre_processing/additional_annotation/
+pre_processing/data/
+pre_processing/manuscript_tables/
+pre_processing/raw_excluded/
+pre_processing/raw/
+pre_processing/script/_backup/
+pre_processing/script/sample_count.r
+script/
+writeup/
