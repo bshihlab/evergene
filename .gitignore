@@ -15,3 +15,4 @@ pre_processing/script/_backup/
 pre_processing/script/sample_count.r
 script/
 writeup/
+.gitignore
