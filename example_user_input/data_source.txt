@@ -1,0 +1,1 @@
+The example data is downloaded from https://www.gtexportal.org/ (version: GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_reads.gct.gz). It has been subsetted to keep only the first 2000 genes.

@@ -12,3 +12,7 @@ Detailed helpfiles can be found by clicking on the question marks next to each s
 [Survival - plots](https://github.com/bshihlab/evergene/blob/main/evergene/helpfiles/survival1.md)\
 [Survival - download buttons](https://github.com/bshihlab/evergene/blob/main/evergene/helpfiles/survival2.md)\
 [Correlation](https://github.com/bshihlab/evergene/blob/main/evergene/helpfiles/correlation.md)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 565a1a15217c03102bae246b1d99deb19fb35bf1
