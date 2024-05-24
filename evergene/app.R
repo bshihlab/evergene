@@ -39,7 +39,8 @@ ui <- fluidPage(theme = shinytheme("sandstone"),
 	navbarPage(
 			   title=div(img(src="evergene_grey.png", height="50", aOlign="left"), "",  class = "dropdown"),
 			   pages_analysis, 
-			   pages_about,
+			   pages_documentation,
+			   pages_about
 			   #pages_contactUs, 
 			   #pages_source
 	) # Navbar page
@@ -52,8 +53,6 @@ server <- function(input, output, session){
 	#### Before analyse -------------------------------------------------------
 	## Observer helpers to populate hints
 	observe_helpers()
-	
-	
 	
 	### Import user-uploaded input data
 	# Show buttons
@@ -129,6 +128,7 @@ server <- function(input, output, session){
 		upload_count = reactive({input$upload_count}), 
 		upload_annotation = reactive({input$upload_annotation}),
 		upload_gene = reactive({input$upload_gene}),
+		upload_survival = reactive({input$upload_survival}),
 		upload_log_transform = reactive({input$upload_log_transform}),
 		upload_raw_count = reactive({input$upload_raw_count}),
 		rv = organised_data
@@ -153,7 +153,7 @@ server <- function(input, output, session){
 	# dropdown menu (selected cancer, gene, pc_x, pc_y)
 	# Display the dropdown accordingly
 	output$display_cancer_type <- renderUI({selectInput("display_cancer_type", "Cancer type", organised_data$input_cancer_type, selected = organised_data$input_cancer_type[1])})
-	output$display_gene <- renderUI({selectInput("display_gene", "Gene", organised_data$formatted_gene_list, selected = organised_data$formatted_gene_list[1])})		
+	output$display_gene <- renderUI({selectInput("display_gene", "Gene/PC", c(organised_data$formatted_gene_list, pc_names), selected = organised_data$formatted_gene_list[1])})		
 	output$display_pcx <- renderUI({selectInput("display_pcx", "PC (x-axis)", c(1:organised_data$max_pc), selected = 1)})
 	output$display_pcy <- renderUI({selectInput("display_pcy", "PC (y-axis)", c(1:organised_data$max_pc), selected = 2)})
 	
@@ -264,11 +264,11 @@ server <- function(input, output, session){
 	#### Main3: Download buttons 
 	## PCA
 	pcaDownloadPdf("download_pdf_pca_button", 
-		rv = organised_data)		
+		rv = organised_data)
 	pcaDownloadZip("download_zip_pca_button", 
-		display_pcx = reactive({input$display_pcx}),
-		display_pcy = reactive({input$display_pcy}),
-		display_pca_annotation = reactive({input$display_pca_annotation}),
+		display_pcx = reactive({input$display_pcx}), 
+		display_pcy = reactive({input$display_pcy}), 
+		display_pca_annotation = reactive({input$display_pca_annotation}), 	
 		rv = organised_data)
 	## Survival
 	survivalDownloadPdf("download_pdf_survival_button",

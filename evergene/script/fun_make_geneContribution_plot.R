@@ -17,10 +17,10 @@ make_geneContribution_plot <- function(gene, scree_df){
 	  
   	# Plotting for genes with almost no expression
 	} else {
-		current_scree_data <- scree_df[,c("PC", "contribution")]
-		colnames(current_scree_data) <- c("PC", "contribution") 
+		plot_df <- scree_df[,c("PC", "contribution")]
+		colnames(plot_df) <- c("PC", "contribution") 
 	  
-		tile_plot_gene <- ggplot(data = current_scree_data, mapping = aes(x = PC, y = 1, label = PC, )) +
+		tile_plot_gene <- ggplot(data = plot_df, mapping = aes(x = PC, y = 1, label = PC )) +
 		  geom_tile(fill = "grey")  +  geom_text(colour = "#ffffff", size=3) +
 		  scale_x_discrete(limit = paste0("PC", 1:length(unique(plot_df$PC)))) +
 		  theme_minimal() + xlab("") + ylab("")

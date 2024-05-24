@@ -1,7 +1,7 @@
 <img src="../www/helper_corr.png" width="550" />
 
 **A.** Switch between input cancer types.\
-**B.** Switch between input genes.\
+**B.** Switch between input genes, signature (log average of input genes) or principal component (PC).\
 **C.** X-axis value (choose between selected sample annotation, gene expression and PCs) for making the correlation plot (E).\
 **D.** Y-axis value (choose between selected sample annotation, gene expression and PCs) for making the correlation plot (E). Multiple values can be selected for Y-axis.\
 **E.** Correlation plot between selected values (C and D). The y-axis label and Pearson correlation coefficient (r) and associated p-value are indicated in the subplot titles. P-values < 1E-20 are indicated by an asterisk.\

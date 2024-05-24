@@ -7,7 +7,7 @@ analyseButton <- function(id) {
 	)
 }
 
-analyseButtonServer <- function(id, input_cancer_type, input_gene_string, user_input_show, upload_count, upload_annotation, upload_gene, upload_log_transform, upload_raw_count, rv) {
+analyseButtonServer <- function(id, input_cancer_type, input_gene_string, user_input_show, upload_count, upload_annotation, upload_gene, upload_survival, upload_log_transform, upload_raw_count, rv) {
   moduleServer(
 	id,
 	function(input, output, session) {
@@ -27,6 +27,7 @@ analyseButtonServer <- function(id, input_cancer_type, input_gene_string, user_i
 				processed_user_input <- userInput_load(in_count = upload_count(),
 												in_annotation = upload_annotation(),
 												in_gene = upload_gene(),
+												in_survival = upload_survival(),
 												input_gene_string = input_gene_string(),
 												in_log_transform = upload_log_transform(),
 												in_raw_count = upload_raw_count())
@@ -37,15 +38,21 @@ analyseButtonServer <- function(id, input_cancer_type, input_gene_string, user_i
 					rv[["exprs_unit"]] = "" 
 					rv[["input_cancer_type"]] <- c("User input" = "User input")
 					rv[["max_pc"]] <- processed_user_input[["max_pc"]]
-					rv[["formatted_gene_list"]] <-  processed_user_input[["formatted_gene_list"]]
+					rv[["formatted_gene_list"]] <-  c(processed_user_input[["formatted_gene_list"]])
 					rv[["pca"]] = list("User input" = processed_user_input[["pca"]])
 					rv[["scree"]] = list("User input" = processed_user_input[["scree"]])
-					rv[["survival"]] = list("User input" = vector()) 
+					rv[["survival"]] = list("User input" = processed_user_input[["survival"]]) 
 					rv[["top_contributions"]] = list("User input" = processed_user_input[["top_contributions"]])
 					rv[["dropdown_pca"]] = list("User input" = processed_user_input[["dropdown_pca"]])
-					rv[["dropdown_survival"]] = list("User input" = vector()) 
+					rv[["dropdown_survival"]] = list("User input" = processed_user_input[["dropdown_survival"]]) 
 					rv[["dropdown_correlation"]] = list("User input" = processed_user_input[["dropdown_correlation"]])
 					rv[["display_message"]] <- processed_user_input[["message"]]
+					
+					# if there are more than 2 genes, average to generate gene geneset
+					if(length(rv[["formatted_gene_list"]] ) > 1 ){
+						rv[["formatted_gene_list"]] <- c(rv[["formatted_gene_list"]], geneset_dropdown)
+					}
+
 				} else {
 					rv[["dataSource"]] = "User input"
 					rv[["showPanel"]] <- FALSE
@@ -55,7 +62,7 @@ analyseButtonServer <- function(id, input_cancer_type, input_gene_string, user_i
 				# Lable selected cancer types with readable names
 				formatted_input_cancer_type <- input_cancer_type()
 				names(formatted_input_cancer_type) <- list_of_cancer_types_rev[input_cancer_type()]
-
+	
 				# format gene names
 				formatting_output <- input_format(input_gene_string(), input_cancer_type())
 				formatted_gene_list <- formatting_output[["formatted_gene_list_named"]]
@@ -83,6 +90,11 @@ analyseButtonServer <- function(id, input_cancer_type, input_gene_string, user_i
 				rv[["display_message"]] = ""
 				
 				
+				# if there are more than 2 genes, average to generate gene geneset
+				if(length(formatted_gene_list) > 1 ){
+					rv[["formatted_gene_list"]] <- c(rv[["formatted_gene_list"]], geneset_dropdown)
+				}
+				print(rv[["dropdown_gene"]])
 				## Indicate computing is in progress
 				# Use a value to indicate that compute is in progress and do not update reactive plots while this is in progress
 				# This is to go around the issues that when users select a new set of cancers/gene while already having plot display, 
@@ -107,11 +119,17 @@ analyseButtonServer <- function(id, input_cancer_type, input_gene_string, user_i
 						# top contributions
 						rv[["top_contributions"]][[current_cancer_type]] <- read_fst(paste0("data/top_contributions/", current_cancer_type, ".fst"))
 						
-						
+
 						# Only read in required genes for tpm. Tpm is currently organised so columns refer to genes
 						# tpm required by both analysis
 						tpm_data <- read_fst(paste0("data/tpm/", current_cancer_type, ".fst"), columns = c("barcode", formatted_gene_list))
 						row.names(tpm_data) <- tpm_data$barcode
+
+						#### Add in value for gene geneset when there is more than one gene
+						if(length(formatted_gene_list) > 1 ){
+							tpm_geneset_calculate <- log2(data.matrix(tpm_data[,formatted_gene_list] + 0.1))
+							tpm_data$geneset <- 2^(rowMeans(tpm_geneset_calculate))
+						}
 				  
 						# Data required for PCA
 						# Annotate sample-PCA data with TPM
@@ -119,17 +137,19 @@ analyseButtonServer <- function(id, input_cancer_type, input_gene_string, user_i
 						pca_data <- merge(sample_annotation, tpm_data, by="barcode")
 						pca_data$PFI_status <- factor(pca_data$PFI, levels=c(0,1))
 						levels(pca_data$PFI_status) <- c("Yes", "No")
-						pca_data$tumour_stage_shortened <- NULL # remove tumour staging
+						#pca_data$tumour_stage_shortened <- NULL # remove tumour staging
 						rv[["pca"]][[current_cancer_type]] <- pca_data
 						rv[["scree"]][[current_cancer_type]] <- read_fst(paste0("data/scree/", current_cancer_type, ".fst"))
 						
 						
 						# Data required for survival analysis
-						tpm_data$barcode = NULL
+						#tpm_data$barcode = NULL
 						#rv[["tpm"]][[current_cancer_type]] <- tpm_data
 
 
-																
+
+
+																			
 						## Organise plot data for survival
 						# Remove duplicates from the same patient
 						labelled_survival_data <- merge(sample_annotation, tpm_data, by.x="barcode", by.y=0)
@@ -140,8 +160,8 @@ analyseButtonServer <- function(id, input_cancer_type, input_gene_string, user_i
 
 						## Organise the dropdown menu for each analysis
 						dropdown_pca <- add_sampleAnnot_pca[add_sampleAnnot_pca %in% colnames(rv[["pca"]][[current_cancer_type]])]
-						dropdown_corr <- c(formatted_gene_list, as.character(dropdown_pca[dropdown_pca %in% annotation_numeric]), pc_names)
-						names(dropdown_corr) <- c(names(formatted_gene_list), names(dropdown_pca)[dropdown_pca %in% annotation_numeric], names(pc_names))
+						dropdown_corr <- c(rv[["formatted_gene_list"]], as.character(dropdown_pca[dropdown_pca %in% annotation_numeric]), pc_names)
+						names(dropdown_corr) <- c(names(rv[["formatted_gene_list"]]), names(dropdown_pca)[dropdown_pca %in% annotation_numeric], names(pc_names))
 						dropdown_survival <- add_sampleAnnot_survival[as.character(add_sampleAnnot_survival) %in% colnames(rv[["pca"]][[current_cancer_type]])]
 
 						rv[["dropdown_pca"]][[current_cancer_type]]  <- dropdown_pca
@@ -149,10 +169,11 @@ analyseButtonServer <- function(id, input_cancer_type, input_gene_string, user_i
 						rv[["dropdown_survival"]][[current_cancer_type]]  <- dropdown_survival
 					}
 				})
-				# All compute has been finished and reactive plots can now be updated
-				rv$computingInProgress <- FALSE
 			}
+
 			
+			# All compute has been finished and reactive plots can now be updated
+			rv$computingInProgress <- FALSE
 		})
 		output$analyse_message <- renderText({
 					validate(need((isTruthy(input_cancer_type()) || (isTruthy(upload_count()) & isTruthy(upload_annotation()))), message = "Please select at least 1 cancer project or upload data & annotation."),

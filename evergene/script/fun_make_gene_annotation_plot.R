@@ -47,7 +47,10 @@ make_gene_annotation_plot <- function(
 				theme(plot.margin=unit(c(14.5,0,0,0),"mm"), 
 					text=element_text(size=10),
 					plot.title = element_text(size=12, margin=margin(0,0,0,0)),
-					panel.grid=element_blank()) + scale_x_log10()
+					panel.grid=element_blank()) 
+	if(min(plot_df[[input_display_gene]]) > 0){
+		corr_plot + scale_x_log10()
+	}
 					
 					
 	# Add points depending on if jittering is required

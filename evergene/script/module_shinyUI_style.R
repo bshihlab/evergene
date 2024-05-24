@@ -13,15 +13,6 @@ shinyUI_taglist <- tagList(
 					".checkbox { margin-bottom: 0px; margin-left: 0px; margin-right: 0px; padding-left: 0px; padding-right: 0px;}",
 					".table { margin-bottom: 0px; margin-left: 0px; margin-right: 0px; padding-left: 0px; padding-right: 0px;}"),
 				tags$head(HTML('<link rel="icon", href="evergene.png", type="image/png" />')),
-				 tags$head(tags$style(HTML(
-					".fileinput_2 {
-					  width: 0.1px;
-					  height: 0.1px;
-					  opacity: 0;
-					  overflow: hidden;
-					  position: absolute;
-					  z-index: -1;
-					}"
-				  )))
+				tags$head(tags$style(HTML(".fileinput_2 {width: 0.1px;height: 0.1px;opacity: 0;overflow: hidden;position: absolute;z-index: -1;}")))
 	)
 				

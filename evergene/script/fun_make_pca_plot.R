@@ -25,15 +25,19 @@ make_pca_plot <- function(pca_annotation, pcx, pcy, scree_df, pca_df, gene_full_
 	
 	# Check if the values are numeric
 	is_numeric <- is.numeric(current_pca_plot_df$val[!is.na(current_pca_plot_df$val)])
-	
+
 	# remove rows with na
 	if(remove_na){
 		current_pca_plot_df <- current_pca_plot_df[!is.na(current_pca_plot_df$val),]
 	}
-
+	
+	# remove TPM colour label if this is a PC
+	if(pca_annotation %in% pc_names){
+		col_label <- ""
+	}
 	# change column names
 	# Only log expression if it's tcga data, as it is not known what data type the user input is
-	if((col_label== "TPM") & (cancer_full_name != "User input")){
+	if((col_label== "TPM") & (cancer_full_name != "User input") & (! pca_annotation %in% pc_names)){
 		# if the fill colour is a gene, add 0.1 to the TPM so it can be log transformed
 		current_pca_plot_df$val <- current_pca_plot_df$val + 0.1
 		colnames(current_pca_plot_df) <- c("sample_id", paste0(pca_annotation, ".expression.tpm"), "pcx", "pcy")
@@ -55,7 +59,7 @@ make_pca_plot <- function(pca_annotation, pcx, pcy, scree_df, pca_df, gene_full_
 
 	# account for non-numeric (discrete colouring)
 	if(is_numeric){
-		if((col_label== "TPM") & (cancer_full_name != "User input")){
+		if((col_label== "TPM") & (cancer_full_name != "User input")& (! pca_annotation %in% pc_names)){
 			my_breaks = round(exp(seq(log(1), log(max(current_pca_plot_df[[plot_name]])), length=6)), 0)
 			pca_plot <- pca_plot + geom_point(aes(colour = .data[[plot_name]])) + scale_colour_viridis(option = "A", trans = "log", breaks = my_breaks, labels = my_breaks, direction = -1, end=0.95)
 		} else {

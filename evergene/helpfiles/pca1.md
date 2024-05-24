@@ -1,7 +1,7 @@
 <img src="../www/helper_pca1.png" width="550" />
 
 **A.** Switch between input cancer types.\
-**B.** Switch between input genes.\
+**B.** Switch between input genes, signature (log average of input genes) or principal component (PC).\
 **C.** The PC number for the x-axis of PCA plots (F and H).\
 **D.** The PC number for the y-axis of PCA plots (F and H).\
 **E.** The % contribution for the selected gene towards each principal component (PC).\

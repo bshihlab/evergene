@@ -38,6 +38,7 @@ library(TCGAbiolinks)
 stemness_df <- read.csv(input_fp_stemness)
 patient_annotation <- read.csv(input_fp_patientAnnotation)
 patient_annotation[patient_annotation == "#N/A"] <- NA
+patient_annotation[patient_annotation == "[Unknown]"] <- NA
 patient_annotation[patient_annotation == "[Not Available]"] <- NA
 event_recommendation <- read.csv(input_fp_event_recommendation)
 

@@ -53,8 +53,8 @@ survivalPlot2 <- function(id, display_cancer_type, display_gene, survival_percen
 					threshBottom = survival_percent_lower() , 
 					threshTop = survival_percent_upper())
 			plot_df <- merge(plot_df[,c("barcode", "exprs_grp")], rv[["pca"]][[display_cancer_type()]], by="barcode")
-			
-
+			plot_df$sample_id <- plot_df$barcode
+			print(head(plot_df))
 			# Check if the values are numeric
 			if(display_survival_annotation() %in% annotation_numeric){
 				plot_df[[display_survival_annotation()]] <- as.numeric(plot_df[[display_survival_annotation()]])
@@ -70,8 +70,8 @@ survivalPlot2 <- function(id, display_cancer_type, display_gene, survival_percen
 			# make plot1 PC-y vs gene exprs coloured by sample annotation 
 			p1 <- ggplot(data = plot_df, 
 				aes(x= .data[[display_gene()]], y =.data[[current_pcy]], 
-					colour= .data[[display_survival_annotation()]])) +
-				geom_point(size=1) + theme_bw() + scale_x_log10() +
+					colour= .data[[display_survival_annotation()]]), label=sample_id) +
+				geom_point(size=1) + theme_bw() +
 				xlab(current_gene_fullname) +
 				theme( panel.grid=element_blank())
 			# change colour scales according to if it is numeric
@@ -85,13 +85,16 @@ survivalPlot2 <- function(id, display_cancer_type, display_gene, survival_percen
 			# make plot2 PC-y vs gene exprs coloured by gene expression groups 
 			p2 <- ggplot(data = plot_df, 
 				aes(x= .data[[display_gene()]], y =.data[[current_pcy]], 
-					colour= .data[["exprs_grp"]])) +
-				geom_point(size=0.8) + theme_bw() + scale_x_log10() +
+					colour= .data[["exprs_grp"]]), label=sample_id) +
+				geom_point(size=0.8) + theme_bw() + 
 				xlab(current_gene_fullname) +
 				guides(colour = guide_legend(override.aes = list(size=5), title=""))  +
 				theme( panel.grid=element_blank()) +
 				scale_colour_manual(values = discrete_cols_exprs[unique(plot_df$exprs_grp)])
-			
+			if(min(plot_df[[display_gene()]])>0){	
+				p1 <- p1 + scale_x_log10() 
+				p2 <- p2 + scale_x_log10() 
+			}
 			if(survival_annotation_figLegend()){
 				subplot(ggplotly(p1) %>% layout(showlegend = F), ggplotly(p2) %>% layout(showlegend = F), nrows=2, shareX = TRUE, shareY=TRUE )
 			} else {
